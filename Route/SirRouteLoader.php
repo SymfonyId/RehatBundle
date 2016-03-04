@@ -268,18 +268,20 @@ class SirRouteLoader extends DelegatingLoader
     private function generateMethod($methodName)
     {
         switch ($methodName) {
-            case 'create' :
+            case 'post' :
                 return new Method(array(
                     'methods' => array('POST'),
                 ));
                 break;
-            case 'update':
+            case 'put':
                 return new Method(array(
                     'methods' => array('PUT'),
                 ));
                 break;
             case 'get':
-            case 'list':
+            case 'cget':
+            case 'new':
+            case 'edit':
                 return new Method(array(
                     'methods' => array('GET'),
                 ));

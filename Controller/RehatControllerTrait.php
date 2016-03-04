@@ -35,7 +35,7 @@ use Symfony\Component\Translation\TranslatorInterface;
 /**
  * @author Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  */
-trait RehatController
+trait RehatControllerTrait
 {
     /**
      * @return ContainerInterface
