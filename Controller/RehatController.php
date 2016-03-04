@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfonian\Indonesia\RehatBundle;
+namespace Symfonian\Indonesia\RehatBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
@@ -25,6 +25,7 @@ use Symfonian\Indonesia\RehatBundle\Event\FilterEntityEvent;
 use Symfonian\Indonesia\RehatBundle\Event\FilterFormEvent;
 use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
+use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -81,7 +82,7 @@ class RehatController extends Controller
 
     public function updateAction(Request $request, $id)
     {
-        $form = $this->getForm($request->get('_form'));
+        $form = $this->getForm($request->get('_form'), 'PUT');
         /** @var EntityInterface $entity */
         $entity = $this->find($request->get('_entity'), $id);
 
@@ -92,6 +93,22 @@ class RehatController extends Controller
         }
 
         return $this->handle($request, $form, $entity, $view);
+    }
+
+    public function getAction(Request $request, $id)
+    {
+        /** @var EntityInterface $entity */
+        $entity = $this->find($request->get('_entity'), $id);
+
+        $view = new View();
+        if (!$entity) {
+            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
+            $view->setStatusCode(Response::HTTP_NOT_FOUND);
+        } else {
+            $view->setData($entity);
+        }
+
+        return $this->handleView($view);
     }
 
     public function deleteAction(Request $request, $id)
@@ -129,7 +146,7 @@ class RehatController extends Controller
         $dispatcher->dispatch($name, $handler);
     }
 
-    private function getForm($form)
+    private function getForm($form, $method = 'POST')
     {
         try {
             $formObject = $this->container->get($form);
@@ -137,10 +154,11 @@ class RehatController extends Controller
             $formObject = new $form();
         }
 
-        /** @var FormInterface $form */
-        $form = $this->container->get('form.factory')->create(get_class($formObject));
+        /** @var FormBuilder $form */
+        $form = $this->container->get('form.factory')->createBuilder(get_class($formObject));
+        $form->setMethod(strtoupper($method));
 
-        return $form;
+        return $form->getForm();
     }
 
     private function handle(Request $request, FormInterface $form, EntityInterface $data, View $view)
