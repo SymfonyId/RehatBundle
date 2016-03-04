@@ -13,7 +13,6 @@ namespace Symfonian\Indonesia\RehatBundle\Controller;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
-use FOS\RestBundle\Controller\FOSRestController as Controller;
 use FOS\RestBundle\View\View;
 use Hateoas\Configuration\Route;
 use Hateoas\Representation\CollectionRepresentation;
@@ -26,6 +25,7 @@ use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
 use Symfonian\Indonesia\RehatBundle\EventListener\ControllerListener;
 use Symfonian\Indonesia\RehatBundle\Model\EntityInterface;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,9 +35,16 @@ use Symfony\Component\Translation\TranslatorInterface;
 /**
  * @author Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  */
-class RehatController extends Controller
+trait RehatController
 {
-    public function listAction(Request $request)
+    /**
+     * @return ContainerInterface
+     */
+    abstract public function getContainer();
+
+    abstract public function handleView(View $view);
+
+    public function cgetAction(Request $request)
     {
         $perPage = $request->query->getInt('limit', 10);
         $page = $request->query->getInt('page', 1);
@@ -143,7 +150,7 @@ class RehatController extends Controller
 
     private function fireEvent($name, $handler)
     {
-        $dispatcher = $this->container->get('event_dispatcher');
+        $dispatcher = $this->getContainer()->get('event_dispatcher');
         $dispatcher->dispatch($name, $handler);
     }
 
@@ -151,13 +158,13 @@ class RehatController extends Controller
     {
         $form = $this->getConfiguration()->getForm();
         try {
-            $formObject = $this->container->get($form);
+            $formObject = $this->getContainer()->get($form);
         } catch (\Exception $ex) {
             $formObject = new $form();
         }
 
         /** @var FormBuilder $form */
-        $form = $this->container->get('form.factory')->createBuilder(get_class($formObject));
+        $form = $this->getContainer()->get('form.factory')->createBuilder(get_class($formObject));
         $form->setMethod(strtoupper($method));
 
         return $form->getForm();
@@ -218,7 +225,7 @@ class RehatController extends Controller
      */
     private function getManager()
     {
-        return $this->getDoctrine()->getManager();
+        return $this->getContainer()->get('doctrine')->getManager();
     }
 
     private function find($entityClass, $id)
@@ -229,7 +236,7 @@ class RehatController extends Controller
     private function translate($message, array $paramters = array(), $translationDomain = Constants::TRANSLATION_DOMAIN)
     {
         /** @var TranslatorInterface $tranlator */
-        $tranlator = $this->container->get('translator');
+        $tranlator = $this->getContainer()->get('translator');
 
         return $tranlator->trans($message, $paramters, $translationDomain);
     }
@@ -244,6 +251,6 @@ class RehatController extends Controller
      */
     private function getConfiguration()
     {
-        return $this->container->get('symfonian_id.rehat.configuration');
+        return $this->getContainer()->get('symfonian_id.rehat.configuration');
     }
 }
