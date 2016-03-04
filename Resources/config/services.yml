@@ -6,6 +6,16 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: parseAnnotation }
 
+    symfonian_id.rehat.sir_route_loader:
+        class: Symfonian\Indonesia\RehatBundle\Route\SirRouteLoader
+        arguments:
+            - '@controller_name_converter'
+            - '@routing.resolver'
+            - '@symfonian_id.rehat.extractor.extractor_factory'
+            - '@kernel'
+        tags:
+            - { name: routing.loader }
+
     symfonian_id.rehat.extractor.extractor_factory:
         class: Symfonian\Indonesia\RehatBundle\Extractor\ExtractorFactory
 

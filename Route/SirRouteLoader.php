@@ -13,7 +13,7 @@ namespace Symfonian\Indonesia\RehatBundle\Route;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfonian\Indonesia\RehatBundle\Controller\RehatController;
+use Symfonian\Indonesia\RehatBundle\Controller\RehatControllerTrait;
 use Symfonian\Indonesia\RehatBundle\Extractor\ExtractorFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\ControllerNameParser;
 use Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader;
@@ -66,10 +66,12 @@ class SirRouteLoader extends DelegatingLoader
         $controllers = $this->findAllControllerFromDir($this->getControllerDir($resource));
         /** @var \ReflectionClass $controller */
         foreach ($controllers as $controller) {
-            if ($controller->isSubclassOf(RehatController::class)) {
-                $this->registerRoute($collection, $controller);
-            } else {
-                $collection->addCollection(parent::load($resource, 'annotation'));
+            foreach ($controller->getTraits() as $trait) {
+                if ($trait->getName() === RehatControllerTrait::class) {
+                    $this->registerRoute($collection, $controller);
+                } else {
+                    $collection->addCollection(parent::load($resource, 'annotation'));
+                }
             }
         }
 
@@ -225,39 +227,28 @@ class SirRouteLoader extends DelegatingLoader
         $controller = $reflectionClass->getName().'::'.$reflectionMethod->getName();
         $methodName = str_replace('action', '', strtolower($reflectionMethod->getName()));
 
-        $loop = true;
-        $index = 0;
-        while ($loop) {
-            if ('list' === $methodName && 0 === $index) {
-                $loop = true;
-                ++$index;
-            } else {
-                $loop = false;
-            }
+        $routeAction = $route ?: $this->generateRoute($methodName);
+        $methodAction = $method ?: $this->generateMethod($methodName);
 
-            $routeAction = $route ?: new Route(array('path' => ''));
-            $methodAction = $method ?: $this->generateMethod($methodName);
-
-            $path = '';
-            if ($controllerRoute) {
-                $path = $controllerRoute->getPath();
-            }
-            $path = $path.$routeAction->getPath();
-
-            $symfonyRoute = new SymfonyRoute(
-                $path,
-                array_merge($routeAction->getDefaults(), array('_controller' => $controller)),
-                $routeAction->getRequirements(),
-                $routeAction->getOptions(),
-                $routeAction->getHost(),
-                $routeAction->getSchemes(),
-                $method ? $method->getMethods() : $methodAction->getMethods(),
-                $routeAction->getCondition()
-            );
-
-            $routeName = $route && $route->getName() ? $route->getName() : substr(str_replace(array('bundle', 'controller', '__'), array('', '', '_'), $name), 0, -6);
-            $collection->add($routeName, $symfonyRoute);
+        $path = '';
+        if ($controllerRoute) {
+            $path = $controllerRoute->getPath();
         }
+        $path = $path.$routeAction->getPath();
+
+        $symfonyRoute = new SymfonyRoute(
+            $path,
+            array_merge($routeAction->getDefaults(), array('_controller' => $controller)),
+            $routeAction->getRequirements(),
+            $routeAction->getOptions(),
+            $routeAction->getHost(),
+            $routeAction->getSchemes(),
+            $method ? $method->getMethods() : $methodAction->getMethods(),
+            $routeAction->getCondition()
+        );
+
+        $routeName = $route && $route->getName() ? $route->getName() : substr(str_replace(array('bundle', 'controller', '__'), array('', '', '_'), $name), 0, -6);
+        $collection->add($routeName, $symfonyRoute);
     }
 
     /**
@@ -296,5 +287,27 @@ class SirRouteLoader extends DelegatingLoader
         return new Method(array(
             'methods' => array(),
         ));
+    }
+
+    private function generateRoute($methodName)
+    {
+        $route = new Route(array());
+
+        switch ($methodName) {
+            case 'new':
+                $route->setPath('/new');
+                break;
+            case 'edit':
+                $route->setPath('/{id}/edit');
+                break;
+            case 'put':
+            case 'delete':
+            case 'get':
+                $route->setPath('/{id}');
+                $route->setRequirements(array('id' => '\d+'));
+                break;
+        }
+
+        return $route;
     }
 }

@@ -12,7 +12,7 @@
 namespace Symfonian\Indonesia\RehatBundle\EventListener;
 
 use Symfonian\Indonesia\RehatBundle\Annotation\Crud;
-use Symfonian\Indonesia\RehatBundle\Controller\RehatController;
+use Symfonian\Indonesia\RehatBundle\Controller\RehatControllerTrait;
 use Symfonian\Indonesia\RehatBundle\Extractor\ExtractorFactory;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
@@ -44,12 +44,20 @@ class ControllerListener
         }
 
         $controller = $controller[0];
-        if (!$controller instanceof RehatController) {
-            return false;
-        }
-
         $reflectionObject = new \ReflectionObject($controller);
         unset($controller);
+
+        $allow = false;
+        foreach ($reflectionObject->getTraits() as $trait) {
+            if ($trait->getName() === RehatControllerTrait::class) {
+                $allow = true;
+                break;
+            }
+        }
+
+        if (!$allow) {
+            return false;
+        }
 
         $this->extractor->extract($reflectionObject);
         foreach ($this->extractor->getClassAnnotations() as $annotation) {

@@ -25,7 +25,6 @@ use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
 use Symfonian\Indonesia\RehatBundle\EventListener\ControllerListener;
 use Symfonian\Indonesia\RehatBundle\Model\EntityInterface;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,11 +37,91 @@ use Symfony\Component\Translation\TranslatorInterface;
 trait RehatControllerTrait
 {
     /**
-     * @return ContainerInterface
+     * @param $serviceId
+     * @return object
      */
-    abstract public function getContainer();
+    abstract protected function get($serviceId);
 
+    /**
+     * @param View $view
+     * @return Response
+     */
     abstract public function handleView(View $view);
+
+    public function postAction(Request $request)
+    {
+        $form = $this->getForm();
+        $entity = $this->getConfiguration()->getEntity();
+
+        return $this->handle($request, $form, new $entity(), new View());
+    }
+
+    public function newAction(Request $request)
+    {
+        return $this->handleView(new View($this->serializeForm($this->getForm())));
+    }
+
+    public function putAction(Request $request, $id)
+    {
+        $form = $this->getForm('PUT');
+        /** @var EntityInterface $entity */
+        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+
+        $view = new View();
+        if (!$entity) {
+            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
+            $view->setStatusCode(Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->handle($request, $form, $entity, $view);
+    }
+
+    public function editAction(Request $request, $id)
+    {
+        $form = $this->getForm('PUT');
+        /** @var EntityInterface $entity */
+        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+
+        $view = new View();
+        if (!$entity) {
+            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
+            $view->setStatusCode(Response::HTTP_NOT_FOUND);
+        } else {
+            $form->setData($entity);
+            $view->setData($this->serializeForm($form));
+        }
+
+        return $this->handleView($view);
+    }
+
+    public function deleteAction(Request $request, $id)
+    {
+        /** @var EntityInterface $entity */
+        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+        $view = new View();
+        if (!$entity) {
+            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
+            $view->setStatusCode(Response::HTTP_NOT_FOUND);
+        }
+
+        $event = new FilterEntityEvent();
+        $event->setEntity($entity);
+        $event->setEntityManager($this->getManager());
+        $this->fireEvent(Constants::PRE_DELETE, $event);
+
+        if ($event->getResponse()) {
+            return $event->getResponse();
+        }
+
+        if (!$this->remove($entity)) {
+            $view->setData($this->getErrorFormat($this->translate('cant_delete'), Response::HTTP_CONFLICT));
+            $view->setStatusCode(Response::HTTP_CONFLICT);
+        } else {
+            $view->setStatusCode(Response::HTTP_NO_CONTENT);
+        }
+
+        return $this->handleView($view);
+    }
 
     public function cgetAction(Request $request)
     {
@@ -96,82 +175,9 @@ trait RehatControllerTrait
         return $this->handleView($view);
     }
 
-    public function postAction(Request $request)
-    {
-        $form = $this->getForm();
-        $entity = $this->getConfiguration()->getEntity();
-
-        return $this->handle($request, $form, new $entity(), new View());
-    }
-
-    public function newAction(Request $request)
-    {
-        return $this->handleView(new View($this->getForm()));
-    }
-
-    public function putAction(Request $request, $id)
-    {
-        $form = $this->getForm('PUT');
-        /** @var EntityInterface $entity */
-        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
-
-        $view = new View();
-        if (!$entity) {
-            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
-            $view->setStatusCode(Response::HTTP_NOT_FOUND);
-        }
-
-        return $this->handle($request, $form, $entity, $view);
-    }
-
-    public function editAction(Request $request, $id)
-    {
-        $form = $this->getForm('PUT');
-        /** @var EntityInterface $entity */
-        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
-
-        $view = new View();
-        if (!$entity) {
-            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
-            $view->setStatusCode(Response::HTTP_NOT_FOUND);
-        }
-        $view->setData($form);
-
-        $this->handleView($view);
-    }
-
-    public function deleteAction(Request $request, $id)
-    {
-        /** @var EntityInterface $entity */
-        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
-        $view = new View();
-        if (!$entity) {
-            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
-            $view->setStatusCode(Response::HTTP_NOT_FOUND);
-        }
-
-        $event = new FilterEntityEvent();
-        $event->setEntity($entity);
-        $event->setEntityManager($this->getManager());
-        $this->fireEvent(Constants::PRE_DELETE, $event);
-
-        if ($event->getResponse()) {
-            return $event->getResponse();
-        }
-
-        if (!$this->remove($entity)) {
-            $view->setData($this->getErrorFormat($this->translate('cant_delete'), Response::HTTP_CONFLICT));
-            $view->setStatusCode(Response::HTTP_CONFLICT);
-        } else {
-            $view->setStatusCode(Response::HTTP_NO_CONTENT);
-        }
-
-        return $this->handleView($view);
-    }
-
     private function fireEvent($name, $handler)
     {
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch($name, $handler);
     }
 
@@ -179,13 +185,13 @@ trait RehatControllerTrait
     {
         $form = $this->getConfiguration()->getForm();
         try {
-            $formObject = $this->getContainer()->get($form);
+            $formObject = $this->get($form);
         } catch (\Exception $ex) {
             $formObject = new $form();
         }
 
         /** @var FormBuilder $form */
-        $form = $this->getContainer()->get('form.factory')->createBuilder(get_class($formObject));
+        $form = $this->get('form.factory')->createBuilder(get_class($formObject));
         $form->setMethod(strtoupper($method));
 
         return $form->getForm();
@@ -246,7 +252,7 @@ trait RehatControllerTrait
      */
     private function getManager()
     {
-        return $this->getContainer()->get('doctrine')->getManager();
+        return $this->get('doctrine')->getManager();
     }
 
     private function find($entityClass, $id)
@@ -257,7 +263,7 @@ trait RehatControllerTrait
     private function translate($message, array $paramters = array(), $translationDomain = Constants::TRANSLATION_DOMAIN)
     {
         /** @var TranslatorInterface $tranlator */
-        $tranlator = $this->getContainer()->get('translator');
+        $tranlator = $this->get('translator');
 
         return $tranlator->trans($message, $paramters, $translationDomain);
     }
@@ -267,11 +273,25 @@ trait RehatControllerTrait
         return array('message' => $message, 'code' => $statusCode);
     }
 
+    private function serializeForm(FormInterface $form)
+    {
+        if (empty(!$form->all())) {
+            $result = array();
+            $result[$form->getName()] = array();
+            foreach ($form->all() as $name => $child) {
+                $result[$form->getName()][$name] = $this->serializeForm($child);
+            }
+            return $result;
+        }
+
+        return $form->getData();
+    }
+
     /**
      * @return ControllerListener
      */
     private function getConfiguration()
     {
-        return $this->getContainer()->get('symfonian_id.rehat.configuration');
+        return $this->get('symfonian_id.rehat.configuration');
     }
 }
