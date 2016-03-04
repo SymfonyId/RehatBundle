@@ -80,29 +80,6 @@ trait RehatController
         return $this->handleView(new View($representation));
     }
 
-    public function createAction(Request $request)
-    {
-        $form = $this->getForm();
-        $entity = $this->getConfiguration()->getEntity();
-
-        return $this->handle($request, $form, new $entity(), new View());
-    }
-
-    public function updateAction(Request $request, $id)
-    {
-        $form = $this->getForm('PUT');
-        /** @var EntityInterface $entity */
-        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
-
-        $view = new View();
-        if (!$entity) {
-            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
-            $view->setStatusCode(Response::HTTP_NOT_FOUND);
-        }
-
-        return $this->handle($request, $form, $entity, $view);
-    }
-
     public function getAction(Request $request, $id)
     {
         /** @var EntityInterface $entity */
@@ -117,6 +94,50 @@ trait RehatController
         }
 
         return $this->handleView($view);
+    }
+
+    public function postAction(Request $request)
+    {
+        $form = $this->getForm();
+        $entity = $this->getConfiguration()->getEntity();
+
+        return $this->handle($request, $form, new $entity(), new View());
+    }
+
+    public function newAction(Request $request)
+    {
+        return $this->handleView(new View($this->getForm()));
+    }
+
+    public function putAction(Request $request, $id)
+    {
+        $form = $this->getForm('PUT');
+        /** @var EntityInterface $entity */
+        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+
+        $view = new View();
+        if (!$entity) {
+            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
+            $view->setStatusCode(Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->handle($request, $form, $entity, $view);
+    }
+
+    public function editAction(Request $request, $id)
+    {
+        $form = $this->getForm('PUT');
+        /** @var EntityInterface $entity */
+        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+
+        $view = new View();
+        if (!$entity) {
+            $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
+            $view->setStatusCode(Response::HTTP_NOT_FOUND);
+        }
+        $view->setData($form);
+
+        $this->handleView($view);
     }
 
     public function deleteAction(Request $request, $id)
