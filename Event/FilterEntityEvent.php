@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the AdminBundle package.
+ * This file is part of the RehatBundle package.
  *
  * (c) Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  *
@@ -12,7 +12,7 @@
 namespace Symfonian\Indonesia\RehatBundle\Event;
 
 use Doctrine\ORM\EntityManager;
-use Symfonian\Indonesia\CoreBundle\Toolkit\DoctrineManager\Model\EntityInterface;
+use Symfonian\Indonesia\RehatBundle\Model\EntityInterface;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Response;
 

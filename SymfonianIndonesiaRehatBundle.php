@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the AdminBundle package.
+ * This file is part of the RehatBundle package.
  *
  * (c) Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  *
@@ -11,15 +11,18 @@
 
 namespace Symfonian\Indonesia\RehatBundle;
 
-use Symfonian\Indonesia\BundlePlugins\PluginBundle as Bundle;
+use Symfonian\Indonesia\RehatBundle\DependencyInjection\Compiler\ExtractorPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * @author Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  */
 class SymfonianIndonesiaRehatBundle extends Bundle
 {
-    public function getAlias()
+    public function build(ContainerBuilder $container)
     {
-        return 'symfonyid_rehat';
+        parent::build($container);
+        $container->addCompilerPass(new ExtractorPass());
     }
 }

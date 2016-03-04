@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the AdminBundle package.
+ * This file is part of the RehatBundle package.
  *
  * (c) Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  *
@@ -20,10 +20,11 @@ use Hateoas\Representation\CollectionRepresentation;
 use Hateoas\Representation\Factory\PagerfantaFactory;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
-use Symfonian\Indonesia\CoreBundle\Toolkit\DoctrineManager\Model\EntityInterface;
 use Symfonian\Indonesia\RehatBundle\Event\FilterEntityEvent;
 use Symfonian\Indonesia\RehatBundle\Event\FilterFormEvent;
 use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
+use Symfonian\Indonesia\RehatBundle\EventListener\ControllerListener;
+use Symfonian\Indonesia\RehatBundle\Model\EntityInterface;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormInterface;
@@ -40,7 +41,7 @@ class RehatController extends Controller
     {
         $perPage = $request->query->getInt('limit', 10);
         $page = $request->query->getInt('page', 1);
-        $entity = $request->get('_entity');
+        $entity = $this->getConfiguration()->getEntity();
         $reflection = new \ReflectionClass($entity);
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->getManager()->createQueryBuilder();
@@ -74,17 +75,17 @@ class RehatController extends Controller
 
     public function createAction(Request $request)
     {
-        $form = $this->getForm($request->get('_form'));
-        $entity = $request->get('_entity');
+        $form = $this->getForm();
+        $entity = $this->getConfiguration()->getEntity();
 
         return $this->handle($request, $form, new $entity(), new View());
     }
 
     public function updateAction(Request $request, $id)
     {
-        $form = $this->getForm($request->get('_form'), 'PUT');
+        $form = $this->getForm('PUT');
         /** @var EntityInterface $entity */
-        $entity = $this->find($request->get('_entity'), $id);
+        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
 
         $view = new View();
         if (!$entity) {
@@ -98,7 +99,7 @@ class RehatController extends Controller
     public function getAction(Request $request, $id)
     {
         /** @var EntityInterface $entity */
-        $entity = $this->find($request->get('_entity'), $id);
+        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
 
         $view = new View();
         if (!$entity) {
@@ -114,7 +115,7 @@ class RehatController extends Controller
     public function deleteAction(Request $request, $id)
     {
         /** @var EntityInterface $entity */
-        $entity = $this->find($request->get('_entity'), $id);
+        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
         $view = new View();
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
@@ -146,8 +147,9 @@ class RehatController extends Controller
         $dispatcher->dispatch($name, $handler);
     }
 
-    private function getForm($form, $method = 'POST')
+    private function getForm($method = 'POST')
     {
+        $form = $this->getConfiguration()->getForm();
         try {
             $formObject = $this->container->get($form);
         } catch (\Exception $ex) {
@@ -235,5 +237,13 @@ class RehatController extends Controller
     private function getErrorFormat($message, $statusCode = Response::HTTP_OK)
     {
         return array('message' => $message, 'code' => $statusCode);
+    }
+
+    /**
+     * @return ControllerListener
+     */
+    private function getConfiguration()
+    {
+        return $this->container->get('symfonian_id.rehat.configuration');
     }
 }

@@ -1,0 +1,31 @@
+services:
+    symfonian_id.rehat.configuration:
+        class: Symfonian\Indonesia\RehatBundle\EventListener\ControllerListener
+        arguments:
+            - '@symfonian_id.rehat.extractor.extractor_factory'
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, method: parseAnnotation }
+
+    symfonian_id.rehat.extractor.extractor_factory:
+        class: Symfonian\Indonesia\RehatBundle\Extractor\ExtractorFactory
+
+    symfonian_id.rehat.extractor.class_extractor:
+        class: Symfonian\Indonesia\RehatBundle\Extractor\ClassExtractor
+        arguments:
+            - '@annotation_reader'
+        tags:
+            - { name: sir.extractor }
+
+    symfonian_id.rehat.extractor.method_extractor:
+        class: Symfonian\Indonesia\RehatBundle\Extractor\MethodExtractor
+        arguments:
+            - '@annotation_reader'
+        tags:
+            - { name: sir.extractor }
+
+    symfonian_id.rehat.extractor.property_extractor:
+        class: Symfonian\Indonesia\RehatBundle\Extractor\PropertyExtractor
+        arguments:
+            - '@annotation_reader'
+        tags:
+            - { name: sir.extractor }

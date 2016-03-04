@@ -9,17 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfonian\Indonesia\RehatBundle;
+namespace Symfonian\Indonesia\RehatBundle\Model;
 
 /**
  * @author Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  */
-class SymfonianIndonesiaRehatConstants
+interface EntityInterface
 {
-    const ENTITY_ALIAS = 'a';
-    const TRANSLATION_DOMAIN = 'SymfonianIndonesiaRehatBundle';
-
-    const FILTER_LIST = 'sir.filter_query';
-    const PRE_FORM_SUBMIT = 'sir.pre_form_submit';
-    const PRE_DELETE = 'sir.pre_delete';
+    public function getId();
 }
