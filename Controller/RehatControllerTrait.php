@@ -38,12 +38,14 @@ trait RehatControllerTrait
 {
     /**
      * @param $serviceId
+     *
      * @return object
      */
     abstract protected function get($serviceId);
 
     /**
      * @param View $view
+     *
      * @return Response
      */
     abstract public function handleView(View $view);
@@ -281,6 +283,7 @@ trait RehatControllerTrait
             foreach ($form->all() as $name => $child) {
                 $result[$form->getName()][$name] = $this->serializeForm($child);
             }
+
             return $result;
         }
 

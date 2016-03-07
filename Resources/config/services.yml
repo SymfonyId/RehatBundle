@@ -1,11 +1,4 @@
 services:
-    symfonian_id.rehat.configuration:
-        class: Symfonian\Indonesia\RehatBundle\EventListener\ControllerListener
-        arguments:
-            - '@symfonian_id.rehat.extractor.extractor_factory'
-        tags:
-            - { name: kernel.event_listener, event: kernel.controller, method: parseAnnotation }
-
     symfonian_id.rehat.sir_route_loader:
         class: Symfonian\Indonesia\RehatBundle\Route\SirRouteLoader
         arguments:

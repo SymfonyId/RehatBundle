@@ -36,7 +36,7 @@ class ControllerListener
         $this->crud = new Crud();
     }
 
-    public function parseAnnotation(FilterControllerEvent $event)
+    public function onKernelController(FilterControllerEvent $event)
     {
         $controller = $event->getController();
         if (!is_array($controller)) {
