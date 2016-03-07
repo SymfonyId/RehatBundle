@@ -127,8 +127,7 @@ trait RehatControllerTrait
 
     public function cgetAction(Request $request)
     {
-        $perPage = $request->query->getInt('limit', 10);
-        $page = $request->query->getInt('page', 1);
+        $requestParams = $this->getRequestParam($request);
         $entity = $this->getConfiguration()->getEntity();
         $reflection = new \ReflectionClass($entity);
         /** @var QueryBuilder $queryBuilder */
@@ -148,14 +147,15 @@ trait RehatControllerTrait
 
         $pagerAdapter = new DoctrineORMAdapter($queryBuilder);
         $pager = new Pagerfanta($pagerAdapter);
-        $pager->setCurrentPage($page);
-        $pager->setMaxPerPage($perPage);
+        $pager->setCurrentPage($requestParams['page']);
+        $pager->setMaxPerPage($requestParams['limit']);
 
+        $embed = strtolower($reflection->getShortName()).'s';
         $pagerFactory = new PagerfantaFactory();
         $representation = $pagerFactory->createRepresentation(
             $pager,
-            new Route($request->get('_route'), array('limit' => $perPage, 'page' => $page)),
-            new CollectionRepresentation($pager->getCurrentPageResults(), $reflection->getShortName(), $reflection->getShortName())
+            new Route($request->get('_route'), $requestParams),
+            new CollectionRepresentation($pager->getCurrentPageResults(), $embed, $embed)
         );
 
         return $this->handleView(new View($representation));
@@ -296,5 +296,23 @@ trait RehatControllerTrait
     private function getConfiguration()
     {
         return $this->get('symfonian_id.rehat.configuration');
+    }
+
+    private function getRequestParam(Request $request)
+    {
+        $params = array(
+            'page' => $request->query->get('page', 1),
+            'limit' => $request->query->get('limit', 10),
+        );//@todo change default values to config
+
+        if ($filter = $request->query->get('filter')) {
+            $params['filter'] = $filter;
+        }
+
+        if ($sortBy = $request->query->get('sort_by')) {
+            $params['sort_by'] = $sortBy;
+        }
+
+        return $params;
     }
 }
