@@ -50,6 +50,10 @@ trait RehatControllerTrait
      */
     abstract public function handleView(View $view);
 
+    /**
+     * @param Request $request
+     * @return Response
+     */
     public function postAction(Request $request)
     {
         $form = $this->getForm();
@@ -58,11 +62,20 @@ trait RehatControllerTrait
         return $this->handle($request, $form, new $entity(), new View());
     }
 
+    /**
+     * @param Request $request
+     * @return Response
+     */
     public function newAction(Request $request)
     {
-        return $this->handleView(new View($this->serializeForm($this->getForm())));
+        return $this->handleView(new View($this->flattenForm($this->getForm())));
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return Response
+     */
     public function putAction(Request $request, $id)
     {
         $form = $this->getForm('PUT');
@@ -78,6 +91,11 @@ trait RehatControllerTrait
         return $this->handle($request, $form, $entity, $view);
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return Response
+     */
     public function editAction(Request $request, $id)
     {
         $form = $this->getForm('PUT');
@@ -90,12 +108,17 @@ trait RehatControllerTrait
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
         } else {
             $form->setData($entity);
-            $view->setData($this->serializeForm($form));
+            $view->setData($this->flattenForm($form));
         }
 
         return $this->handleView($view);
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return Response
+     */
     public function deleteAction(Request $request, $id)
     {
         /** @var EntityInterface $entity */
@@ -125,6 +148,10 @@ trait RehatControllerTrait
         return $this->handleView($view);
     }
 
+    /**
+     * @param Request $request
+     * @return Response
+     */
     public function cgetAction(Request $request)
     {
         $requestParams = $this->getRequestParam($request);
@@ -161,6 +188,11 @@ trait RehatControllerTrait
         return $this->handleView(new View($representation));
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return Response
+     */
     public function getAction(Request $request, $id)
     {
         /** @var EntityInterface $entity */
@@ -177,12 +209,20 @@ trait RehatControllerTrait
         return $this->handleView($view);
     }
 
+    /**
+     * @param $name
+     * @param $handler
+     */
     private function fireEvent($name, $handler)
     {
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch($name, $handler);
     }
 
+    /**
+     * @param string $method
+     * @return \Symfony\Component\Form\Form
+     */
     private function getForm($method = 'POST')
     {
         $form = $this->getConfiguration()->getForm();
@@ -199,6 +239,13 @@ trait RehatControllerTrait
         return $form->getForm();
     }
 
+    /**
+     * @param Request $request
+     * @param FormInterface $form
+     * @param EntityInterface $data
+     * @param View $view
+     * @return Response
+     */
     private function handle(Request $request, FormInterface $form, EntityInterface $data, View $view)
     {
         $event = new FilterFormEvent();
@@ -229,6 +276,9 @@ trait RehatControllerTrait
         return $this->handleView($view);
     }
 
+    /**
+     * @param EntityInterface $entity
+     */
     private function save(EntityInterface $entity)
     {
         $entityManager = $this->getManager();
@@ -236,6 +286,10 @@ trait RehatControllerTrait
         $entityManager->flush();
     }
 
+    /**
+     * @param EntityInterface $entity
+     * @return bool
+     */
     private function remove(EntityInterface $entity)
     {
         $entityManager = $this->getManager();
@@ -257,11 +311,22 @@ trait RehatControllerTrait
         return $this->get('doctrine')->getManager();
     }
 
+    /**
+     * @param $entityClass
+     * @param $id
+     * @return null|object
+     */
     private function find($entityClass, $id)
     {
         return $this->getManager()->getRepository($entityClass)->find($id);
     }
 
+    /**
+     * @param $message
+     * @param array $paramters
+     * @param string $translationDomain
+     * @return string
+     */
     private function translate($message, array $paramters = array(), $translationDomain = Constants::TRANSLATION_DOMAIN)
     {
         /** @var TranslatorInterface $tranlator */
@@ -270,18 +335,27 @@ trait RehatControllerTrait
         return $tranlator->trans($message, $paramters, $translationDomain);
     }
 
+    /**
+     * @param $message
+     * @param int $statusCode
+     * @return array
+     */
     private function getErrorFormat($message, $statusCode = Response::HTTP_OK)
     {
         return array('message' => $message, 'code' => $statusCode);
     }
 
-    private function serializeForm(FormInterface $form)
+    /**
+     * @param FormInterface $form
+     * @return array|mixed
+     */
+    private function flattenForm(FormInterface $form)
     {
         if (empty(!$form->all())) {
             $result = array();
             $result[$form->getName()] = array();
             foreach ($form->all() as $name => $child) {
-                $result[$form->getName()][$name] = $this->serializeForm($child);
+                $result[$form->getName()][$name] = $this->flattenForm($child);
             }
 
             return $result;
@@ -298,6 +372,10 @@ trait RehatControllerTrait
         return $this->get('symfonian_id.rehat.configuration');
     }
 
+    /**
+     * @param Request $request
+     * @return array
+     */
     private function getRequestParam(Request $request)
     {
         $params = array(

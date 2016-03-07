@@ -29,6 +29,9 @@ class ControllerListener
     private $form;
     private $entity;
 
+    /**
+     * @param ExtractorFactory $extractor
+     */
     public function __construct(ExtractorFactory $extractor)
     {
         $this->extractor = $extractor;
@@ -36,6 +39,10 @@ class ControllerListener
         $this->crud = new Crud();
     }
 
+    /**
+     * @param FilterControllerEvent $event
+     * @return bool
+     */
     public function onKernelController(FilterControllerEvent $event)
     {
         $controller = $event->getController();

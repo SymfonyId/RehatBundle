@@ -20,6 +20,9 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class ExtractorPass implements CompilerPassInterface
 {
+    /**
+     * @param ContainerBuilder $container
+     */
     public function process(ContainerBuilder $container)
     {
         if (!$container->has('symfonian_id.rehat.extractor.extractor_factory')) {

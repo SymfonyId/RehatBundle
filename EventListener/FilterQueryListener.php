@@ -30,12 +30,19 @@ class FilterQueryListener
     private static $ALIAS = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
     private static $ALIAS_USED = array(Constants::ENTITY_ALIAS);
 
+    /**
+     * @param EntityManager $entityManager
+     * @param Reader $reader
+     */
     public function __construct(EntityManager $entityManager, Reader $reader)
     {
         $this->entityManager = $entityManager;
         $this->reader = $reader;
     }
 
+    /**
+     * @param GetResponseEvent $event
+     */
     public function onKernelRequest(GetResponseEvent $event)
     {
         if (!$event->isMasterRequest()) {
@@ -50,6 +57,10 @@ class FilterQueryListener
         $this->filter = $request->query->filter('filter');
     }
 
+    /**
+     * @param FilterControllerEvent $event
+     * @return bool
+     */
     public function onKernelController(FilterControllerEvent $event)
     {
         $controller = $event->getController();
@@ -76,6 +87,9 @@ class FilterQueryListener
         unset($controller);
     }
 
+    /**
+     * @param FilterQueryEvent $event
+     */
     public function onFilterQuery(FilterQueryEvent $event)
     {
         $entity = $event->getEntityClass();
@@ -87,6 +101,10 @@ class FilterQueryListener
         $this->applyFilter($this->getClassMetadata($entity), $event->getQueryBuilder(), $filters, $this->filter);
     }
 
+    /**
+     * @param \ReflectionClass $reflection
+     * @return array
+     */
     private function getFilters(\ReflectionClass $reflection)
     {
         $filters = array();
@@ -101,11 +119,21 @@ class FilterQueryListener
         return $filters;
     }
 
+    /**
+     * @param $entity
+     * @return ClassMetadata
+     */
     private function getClassMetadata($entity)
     {
         return $this->entityManager->getClassMetadata($entity);
     }
 
+    /**
+     * @param ClassMetadata $metadata
+     * @param QueryBuilder $queryBuilder
+     * @param array $filterFields
+     * @param $filter
+     */
     private function applyFilter(ClassMetadata $metadata, QueryBuilder $queryBuilder, array $filterFields, $filter)
     {
         foreach ($this->getMapping($metadata, $filterFields) as $key => $value) {
@@ -118,6 +146,12 @@ class FilterQueryListener
         }
     }
 
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param array $metadata
+     * @param $alias
+     * @param $filter
+     */
     private function buildFilter(QueryBuilder $queryBuilder, array $metadata, $alias, $filter)
     {
         if (in_array($metadata['type'], array('date', 'datetime', 'time'))) {
@@ -132,6 +166,12 @@ class FilterQueryListener
         }
     }
 
+    /**
+     * @param ClassMetadata $metadata
+     * @param array $fields
+     * @return array
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
     private function getMapping(ClassMetadata $metadata, array $fields)
     {
         $filters = array();
@@ -155,6 +195,9 @@ class FilterQueryListener
         return $filters;
     }
 
+    /**
+     * @return string
+     */
     private function getAlias()
     {
         $available = array_values(array_diff(self::$ALIAS, self::$ALIAS_USED));
