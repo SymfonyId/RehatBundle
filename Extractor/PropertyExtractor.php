@@ -33,6 +33,7 @@ class PropertyExtractor implements ExtractorInterface
 
     /**
      * @param \Reflector $reflectionProperty
+     *
      * @return array
      */
     public function extract(\Reflector $reflectionProperty)

@@ -33,6 +33,7 @@ class MethodExtractor implements ExtractorInterface
 
     /**
      * @param \Reflector $reflectionMethod
+     *
      * @return array
      */
     public function extract(\Reflector $reflectionMethod)

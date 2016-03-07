@@ -18,6 +18,7 @@ interface ExtractorInterface
 {
     /**
      * @param \Reflector $reflectionClass
+     *
      * @return array
      */
     public function extract(\Reflector $reflectionClass);

@@ -18,6 +18,7 @@ class SymfonianIndonesiaRehatConstants
 {
     const ENTITY_ALIAS = 'a';
     const TRANSLATION_DOMAIN = 'SymfonianIndonesiaRehatBundle';
+    const SESSION_SORTED_NAME = 'sir.sort';
 
     const FILTER_LIST = 'sir.filter_query';
     const PRE_FORM_SUBMIT = 'sir.pre_form_submit';

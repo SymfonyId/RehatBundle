@@ -8,6 +8,20 @@ services:
 
     symfonian_id.rehat.filter_query:
         class: Symfonian\Indonesia\RehatBundle\EventListener\FilterQueryListener
+        calls:
+            - [setContainer, ['@service_container']]
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '@annotation_reader'
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+            - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
+            - { name: kernel.event_listener, event: sir.filter_query, method: onFilterQuery }
+
+    symfonian_id.rehat.sort_query:
+        class: Symfonian\Indonesia\RehatBundle\EventListener\SortQueryListener
+        calls:
+            - [setContainer, ['@service_container']]
         arguments:
             - '@doctrine.orm.entity_manager'
             - '@annotation_reader'

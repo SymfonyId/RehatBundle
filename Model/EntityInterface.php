@@ -17,7 +17,7 @@ namespace Symfonian\Indonesia\RehatBundle\Model;
 interface EntityInterface
 {
     /**
-     * @return integer
+     * @return int
      */
     public function getId();
 }

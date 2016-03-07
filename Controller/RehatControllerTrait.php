@@ -52,6 +52,7 @@ trait RehatControllerTrait
 
     /**
      * @param Request $request
+     *
      * @return Response
      */
     public function postAction(Request $request)
@@ -64,6 +65,7 @@ trait RehatControllerTrait
 
     /**
      * @param Request $request
+     *
      * @return Response
      */
     public function newAction(Request $request)
@@ -74,6 +76,7 @@ trait RehatControllerTrait
     /**
      * @param Request $request
      * @param $id
+     *
      * @return Response
      */
     public function putAction(Request $request, $id)
@@ -94,6 +97,7 @@ trait RehatControllerTrait
     /**
      * @param Request $request
      * @param $id
+     *
      * @return Response
      */
     public function editAction(Request $request, $id)
@@ -117,6 +121,7 @@ trait RehatControllerTrait
     /**
      * @param Request $request
      * @param $id
+     *
      * @return Response
      */
     public function deleteAction(Request $request, $id)
@@ -150,6 +155,7 @@ trait RehatControllerTrait
 
     /**
      * @param Request $request
+     *
      * @return Response
      */
     public function cgetAction(Request $request)
@@ -191,6 +197,7 @@ trait RehatControllerTrait
     /**
      * @param Request $request
      * @param $id
+     *
      * @return Response
      */
     public function getAction(Request $request, $id)
@@ -221,6 +228,7 @@ trait RehatControllerTrait
 
     /**
      * @param string $method
+     *
      * @return \Symfony\Component\Form\Form
      */
     private function getForm($method = 'POST')
@@ -240,10 +248,11 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param Request $request
-     * @param FormInterface $form
+     * @param Request         $request
+     * @param FormInterface   $form
      * @param EntityInterface $data
-     * @param View $view
+     * @param View            $view
+     *
      * @return Response
      */
     private function handle(Request $request, FormInterface $form, EntityInterface $data, View $view)
@@ -288,6 +297,7 @@ trait RehatControllerTrait
 
     /**
      * @param EntityInterface $entity
+     *
      * @return bool
      */
     private function remove(EntityInterface $entity)
@@ -314,6 +324,7 @@ trait RehatControllerTrait
     /**
      * @param $entityClass
      * @param $id
+     *
      * @return null|object
      */
     private function find($entityClass, $id)
@@ -323,8 +334,9 @@ trait RehatControllerTrait
 
     /**
      * @param $message
-     * @param array $paramters
+     * @param array  $paramters
      * @param string $translationDomain
+     *
      * @return string
      */
     private function translate($message, array $paramters = array(), $translationDomain = Constants::TRANSLATION_DOMAIN)
@@ -338,6 +350,7 @@ trait RehatControllerTrait
     /**
      * @param $message
      * @param int $statusCode
+     *
      * @return array
      */
     private function getErrorFormat($message, $statusCode = Response::HTTP_OK)
@@ -347,6 +360,7 @@ trait RehatControllerTrait
 
     /**
      * @param FormInterface $form
+     *
      * @return array|mixed
      */
     private function flattenForm(FormInterface $form)
@@ -374,6 +388,7 @@ trait RehatControllerTrait
 
     /**
      * @param Request $request
+     *
      * @return array
      */
     private function getRequestParam(Request $request)

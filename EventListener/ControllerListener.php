@@ -12,14 +12,13 @@
 namespace Symfonian\Indonesia\RehatBundle\EventListener;
 
 use Symfonian\Indonesia\RehatBundle\Annotation\Crud;
-use Symfonian\Indonesia\RehatBundle\Controller\RehatControllerTrait;
 use Symfonian\Indonesia\RehatBundle\Extractor\ExtractorFactory;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 /**
  * @author Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  */
-class ControllerListener
+class ControllerListener extends AbstractListener
 {
     /**
      * @var ExtractorFactory
@@ -35,38 +34,20 @@ class ControllerListener
     public function __construct(ExtractorFactory $extractor)
     {
         $this->extractor = $extractor;
-
-        $this->crud = new Crud();
     }
 
     /**
      * @param FilterControllerEvent $event
+     *
      * @return bool
      */
     public function onKernelController(FilterControllerEvent $event)
     {
-        $controller = $event->getController();
-        if (!is_array($controller)) {
-            return false;
+        if (!$this->isValid($event)) {
+            return;
         }
 
-        $controller = $controller[0];
-        $reflectionObject = new \ReflectionObject($controller);
-        unset($controller);
-
-        $allow = false;
-        foreach ($reflectionObject->getTraits() as $trait) {
-            if ($trait->getName() === RehatControllerTrait::class) {
-                $allow = true;
-                break;
-            }
-        }
-
-        if (!$allow) {
-            return false;
-        }
-
-        $this->extractor->extract($reflectionObject);
+        $this->extractor->extract($this->getReflectionController());
         foreach ($this->extractor->getClassAnnotations() as $annotation) {
             if ($annotation instanceof Crud) {
                 $this->entity = $annotation->getEntity();

@@ -26,6 +26,7 @@ class ExtractorFactory
 
     /**
      * @param ExtractorInterface $extractor
+     *
      * @throws \Exception
      */
     public function addExtractor(ExtractorInterface $extractor)
@@ -111,6 +112,7 @@ class ExtractorFactory
 
     /**
      * @param $name
+     *
      * @return ExtractorInterface
      */
     private function getExtractor($name)

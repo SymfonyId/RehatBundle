@@ -291,6 +291,7 @@ class SirRouteLoader extends DelegatingLoader
 
     /**
      * @param $methodName
+     *
      * @return Route
      */
     private function generateRoute($methodName)

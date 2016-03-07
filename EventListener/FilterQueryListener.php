@@ -7,36 +7,26 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
 use Symfonian\Indonesia\RehatBundle\Annotation\Filter;
-use Symfonian\Indonesia\RehatBundle\Controller\RehatControllerTrait;
 use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
-class FilterQueryListener
+class FilterQueryListener extends AbstractQueryListener
 {
-    /**
-     * @var EntityManager
-     */
-    private $entityManager;
-
     /**
      * @var Reader
      */
     private $reader;
 
     private $filter;
-    private $controller;
-    private static $ALIAS = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
-    private static $ALIAS_USED = array(Constants::ENTITY_ALIAS);
 
     /**
      * @param EntityManager $entityManager
-     * @param Reader $reader
+     * @param Reader        $reader
      */
     public function __construct(EntityManager $entityManager, Reader $reader)
     {
-        $this->entityManager = $entityManager;
+        parent::__construct($entityManager);
         $this->reader = $reader;
     }
 
@@ -58,36 +48,6 @@ class FilterQueryListener
     }
 
     /**
-     * @param FilterControllerEvent $event
-     * @return bool
-     */
-    public function onKernelController(FilterControllerEvent $event)
-    {
-        $controller = $event->getController();
-        if (!is_array($controller)) {
-            return false;
-        }
-
-        $controller = $controller[0];
-        $reflectionObject = new \ReflectionObject($controller);
-
-        $allow = false;
-        foreach ($reflectionObject->getTraits() as $trait) {
-            if ($trait->getName() === RehatControllerTrait::class) {
-                $allow = true;
-                break;
-            }
-        }
-
-        if (!$allow) {
-            return false;
-        }
-
-        $this->controller = $controller;
-        unset($controller);
-    }
-
-    /**
      * @param FilterQueryEvent $event
      */
     public function onFilterQuery(FilterQueryEvent $event)
@@ -103,6 +63,7 @@ class FilterQueryListener
 
     /**
      * @param \ReflectionClass $reflection
+     *
      * @return array
      */
     private function getFilters(\ReflectionClass $reflection)
@@ -120,18 +81,9 @@ class FilterQueryListener
     }
 
     /**
-     * @param $entity
-     * @return ClassMetadata
-     */
-    private function getClassMetadata($entity)
-    {
-        return $this->entityManager->getClassMetadata($entity);
-    }
-
-    /**
      * @param ClassMetadata $metadata
-     * @param QueryBuilder $queryBuilder
-     * @param array $filterFields
+     * @param QueryBuilder  $queryBuilder
+     * @param array         $filterFields
      * @param $filter
      */
     private function applyFilter(ClassMetadata $metadata, QueryBuilder $queryBuilder, array $filterFields, $filter)
@@ -148,7 +100,7 @@ class FilterQueryListener
 
     /**
      * @param QueryBuilder $queryBuilder
-     * @param array $metadata
+     * @param array        $metadata
      * @param $alias
      * @param $filter
      */
@@ -168,11 +120,13 @@ class FilterQueryListener
 
     /**
      * @param ClassMetadata $metadata
-     * @param array $fields
+     * @param array         $fields
+     *
      * @return array
+     *
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function getMapping(ClassMetadata $metadata, array $fields)
+    protected function getMapping(ClassMetadata $metadata, array $fields)
     {
         $filters = array();
         foreach ($fields as $field) {
@@ -193,17 +147,5 @@ class FilterQueryListener
         }
 
         return $filters;
-    }
-
-    /**
-     * @return string
-     */
-    private function getAlias()
-    {
-        $available = array_values(array_diff(self::$ALIAS, self::$ALIAS_USED));
-        $alias = $available[0];
-        self::$ALIAS_USED[] = $alias;
-
-        return $alias;
     }
 }
