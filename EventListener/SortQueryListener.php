@@ -83,8 +83,10 @@ class SortQueryListener extends AbstractQueryListener
 
     /**
      * @param ClassMetadata $metadata
-     * @param array $fields
+     * @param array         $fields
+     *
      * @return array
+     *
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
     protected function getMapping(ClassMetadata $metadata, array $fields)
@@ -112,8 +114,8 @@ class SortQueryListener extends AbstractQueryListener
 
     /**
      * @param ClassMetadata $metadata
-     * @param QueryBuilder $queryBuilder
-     * @param array $fields
+     * @param QueryBuilder  $queryBuilder
+     * @param array         $fields
      */
     private function applySort(ClassMetadata $metadata, QueryBuilder $queryBuilder, array $fields)
     {

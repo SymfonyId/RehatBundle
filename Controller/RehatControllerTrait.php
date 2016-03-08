@@ -22,7 +22,6 @@ use Pagerfanta\Pagerfanta;
 use Symfonian\Indonesia\RehatBundle\Event\FilterEntityEvent;
 use Symfonian\Indonesia\RehatBundle\Event\FilterFormEvent;
 use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
-use Symfonian\Indonesia\RehatBundle\EventListener\ControllerListener;
 use Symfonian\Indonesia\RehatBundle\Model\EntityInterface;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
 use Symfony\Component\Form\FormBuilder;
@@ -58,8 +57,8 @@ trait RehatControllerTrait
     abstract protected function handleView(View $view);
 
     /**
-     * @param Request $request
-     * @param FormInterface $form
+     * @param Request         $request
+     * @param FormInterface   $form
      * @param EntityInterface $entity
      *
      * @return Response
@@ -80,10 +79,10 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param Request $request
+     * @param Request       $request
      * @param FormInterface $form
-     * @param integer $id
-     * @param string $entityClass
+     * @param int           $id
+     * @param string        $entityClass
      *
      * @return Response
      */
@@ -103,8 +102,8 @@ trait RehatControllerTrait
 
     /**
      * @param FormInterface $form
-     * @param integer $id
-     * @param string $entityClass
+     * @param int           $id
+     * @param string        $entityClass
      *
      * @return Response
      */
@@ -126,7 +125,7 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param integer $id
+     * @param int    $id
      * @param string $entityClass
      *
      * @return Response
@@ -161,7 +160,7 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param Request $request
+     * @param Request         $request
      * @param EntityInterface $entity
      *
      * @return Response
@@ -202,7 +201,7 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param integer $id
+     * @param int    $id
      * @param string $entityClass
      *
      * @return Response
