@@ -63,7 +63,7 @@ trait RehatControllerTrait
      *
      * @return Response
      */
-    protected function postAction(Request $request, FormInterface $form, EntityInterface $entity)
+    protected function post(Request $request, FormInterface $form, EntityInterface $entity)
     {
         return $this->handle($request, $form, $entity, new View());
     }
@@ -73,7 +73,7 @@ trait RehatControllerTrait
      *
      * @return Response
      */
-    protected function newAction(FormInterface $form)
+    protected function new(FormInterface $form)
     {
         return $this->handleView(new View($this->flattenForm($form)));
     }
@@ -86,7 +86,7 @@ trait RehatControllerTrait
      *
      * @return Response
      */
-    protected function putAction(Request $request, FormInterface $form, $id, $entityClass)
+    protected function put(Request $request, FormInterface $form, $id, $entityClass)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
@@ -107,7 +107,7 @@ trait RehatControllerTrait
      *
      * @return Response
      */
-    protected function editAction(FormInterface $form, $id, $entityClass)
+    protected function edit(FormInterface $form, $id, $entityClass)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
@@ -130,7 +130,7 @@ trait RehatControllerTrait
      *
      * @return Response
      */
-    protected function deleteAction($id, $entityClass)
+    protected function delete($id, $entityClass)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
@@ -165,7 +165,7 @@ trait RehatControllerTrait
      *
      * @return Response
      */
-    protected function cgetAction(Request $request, EntityInterface $entity)
+    protected function getCollection(Request $request, EntityInterface $entity)
     {
         $requestParams = $this->getRequestParam($request);
         $reflection = new \ReflectionClass($entity);
@@ -206,7 +206,7 @@ trait RehatControllerTrait
      *
      * @return Response
      */
-    protected function getAction($id, $entityClass)
+    protected function getSingle($id, $entityClass)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
