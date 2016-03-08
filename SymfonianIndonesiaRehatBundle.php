@@ -11,7 +11,6 @@
 
 namespace Symfonian\Indonesia\RehatBundle;
 
-use Symfonian\Indonesia\RehatBundle\DependencyInjection\Compiler\ExtractorPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -26,6 +25,5 @@ class SymfonianIndonesiaRehatBundle extends Bundle
     public function build(ContainerBuilder $container)
     {
         parent::build($container);
-        $container->addCompilerPass(new ExtractorPass());
     }
 }

@@ -107,7 +107,7 @@ class FilterQueryListener extends AbstractQueryListener
     private function buildFilter(QueryBuilder $queryBuilder, array $metadata, $alias, $filter)
     {
         if (in_array($metadata['type'], array('date', 'datetime', 'time'))) {
-            $date = \DateTime::createFromFormat('d-m-Y', $filter);//@todo change to config date format
+            $date = \DateTime::createFromFormat($this->getContainer()->getParameter('sir.date_format'), $filter);
             if ($date) {
                 $queryBuilder->andWhere(sprintf('%s.%s = :%s', $alias, $metadata['fieldName'], $metadata['fieldName']));
                 $queryBuilder->setParameter($metadata['fieldName'], $date->format('Y-m-d'));

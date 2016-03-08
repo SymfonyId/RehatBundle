@@ -9,11 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfonian\Indonesia\RehatBundle\Cache;
+namespace Symfonian\Indonesia\RehatBundle\Controller;
+
+use FOS\RestBundle\Controller\FOSRestController;
 
 /**
  * @author Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  */
-class ConfigurationCacheWarmer
+class RehatController extends FOSRestController
 {
+    use RehatControllerTrait;
 }

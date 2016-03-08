@@ -30,8 +30,10 @@ class SymfonianIndonesiaRehatExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter('sir.data_format', $config['date_format']);
+        $container->setParameter('sir.limit', $config['limit']);
+
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
         $loader->load('listeners.yml');
     }
 }

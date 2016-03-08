@@ -44,46 +44,53 @@ trait RehatControllerTrait
     abstract protected function get($serviceId);
 
     /**
+     * @param $parameter
+     *
+     * @return object
+     */
+    abstract protected function getParameter($parameter);
+
+    /**
      * @param View $view
      *
      * @return Response
      */
-    abstract public function handleView(View $view);
+    abstract protected function handleView(View $view);
 
     /**
      * @param Request $request
+     * @param FormInterface $form
+     * @param EntityInterface $entity
      *
      * @return Response
      */
-    public function postAction(Request $request)
+    protected function postAction(Request $request, FormInterface $form, EntityInterface $entity)
     {
-        $form = $this->getForm();
-        $entity = $this->getConfiguration()->getEntity();
+        return $this->handle($request, $form, $entity, new View());
+    }
 
-        return $this->handle($request, $form, new $entity(), new View());
+    /**
+     * @param FormInterface $form
+     *
+     * @return Response
+     */
+    protected function newAction(FormInterface $form)
+    {
+        return $this->handleView(new View($this->flattenForm($form)));
     }
 
     /**
      * @param Request $request
+     * @param FormInterface $form
+     * @param integer $id
+     * @param string $entityClass
      *
      * @return Response
      */
-    public function newAction(Request $request)
+    protected function putAction(Request $request, FormInterface $form, $id, $entityClass)
     {
-        return $this->handleView(new View($this->flattenForm($this->getForm())));
-    }
-
-    /**
-     * @param Request $request
-     * @param $id
-     *
-     * @return Response
-     */
-    public function putAction(Request $request, $id)
-    {
-        $form = $this->getForm('PUT');
         /** @var EntityInterface $entity */
-        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+        $entity = $this->find($entityClass, $id);
 
         $view = new View();
         if (!$entity) {
@@ -95,16 +102,16 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param Request $request
-     * @param $id
+     * @param FormInterface $form
+     * @param integer $id
+     * @param string $entityClass
      *
      * @return Response
      */
-    public function editAction(Request $request, $id)
+    protected function editAction(FormInterface $form, $id, $entityClass)
     {
-        $form = $this->getForm('PUT');
         /** @var EntityInterface $entity */
-        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+        $entity = $this->find($entityClass, $id);
 
         $view = new View();
         if (!$entity) {
@@ -119,15 +126,15 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param Request $request
-     * @param $id
+     * @param integer $id
+     * @param string $entityClass
      *
      * @return Response
      */
-    public function deleteAction(Request $request, $id)
+    protected function deleteAction($id, $entityClass)
     {
         /** @var EntityInterface $entity */
-        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+        $entity = $this->find($entityClass, $id);
         $view = new View();
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
@@ -155,13 +162,13 @@ trait RehatControllerTrait
 
     /**
      * @param Request $request
+     * @param EntityInterface $entity
      *
      * @return Response
      */
-    public function cgetAction(Request $request)
+    protected function cgetAction(Request $request, EntityInterface $entity)
     {
         $requestParams = $this->getRequestParam($request);
-        $entity = $this->getConfiguration()->getEntity();
         $reflection = new \ReflectionClass($entity);
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->getManager()->createQueryBuilder();
@@ -195,15 +202,15 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param Request $request
-     * @param $id
+     * @param integer $id
+     * @param string $entityClass
      *
      * @return Response
      */
-    public function getAction(Request $request, $id)
+    protected function getAction($id, $entityClass)
     {
         /** @var EntityInterface $entity */
-        $entity = $this->find($this->getConfiguration()->getEntity(), $id);
+        $entity = $this->find($entityClass, $id);
 
         $view = new View();
         if (!$entity) {
@@ -217,23 +224,13 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param $name
-     * @param $handler
-     */
-    private function fireEvent($name, $handler)
-    {
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch($name, $handler);
-    }
-
-    /**
+     * @param string $form
      * @param string $method
      *
      * @return \Symfony\Component\Form\Form
      */
-    private function getForm($method = 'POST')
+    protected function getForm($form, $method = 'POST')
     {
-        $form = $this->getConfiguration()->getForm();
         try {
             $formObject = $this->get($form);
         } catch (\Exception $ex) {
@@ -245,6 +242,16 @@ trait RehatControllerTrait
         $form->setMethod(strtoupper($method));
 
         return $form->getForm();
+    }
+
+    /**
+     * @param $name
+     * @param $handler
+     */
+    private function fireEvent($name, $handler)
+    {
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch($name, $handler);
     }
 
     /**
@@ -379,14 +386,6 @@ trait RehatControllerTrait
     }
 
     /**
-     * @return ControllerListener
-     */
-    private function getConfiguration()
-    {
-        return $this->get('symfonian_id.rehat.configuration');
-    }
-
-    /**
      * @param Request $request
      *
      * @return array
@@ -395,8 +394,8 @@ trait RehatControllerTrait
     {
         $params = array(
             'page' => $request->query->get('page', 1),
-            'limit' => $request->query->get('limit', 10),
-        );//@todo change default values to config
+            'limit' => $request->query->get('limit', $this->getParameter('sir.limit')),
+        );
 
         if ($filter = $request->query->get('filter')) {
             $params['filter'] = $filter;

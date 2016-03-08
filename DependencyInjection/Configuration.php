@@ -27,6 +27,17 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('symfonian_indonesia_rehat');
 
+        $rootNode
+            ->children()
+                ->scalarNode('date_format')
+                    ->defaultValue('d-m-Y')
+                ->end()
+                ->scalarNode('limit')
+                    ->defaultValue(9)
+                ->end()
+            ->end()
+        ;
+
         return $treeBuilder;
     }
 }

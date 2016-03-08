@@ -26,8 +26,6 @@
         "sensio/distribution-bundle": "^5.0",
         "sensio/framework-extra-bundle": "^3.0.2",
         "sensio/generator-bundle": "^3.0",
-        "nelmio/api-doc-bundle": "~2.9",
-        "symfonyid/symfony-bundle-plugins": "dev-master",
         "willdurand/hateoas-bundle": "dev-master",
         "jms/serializer-bundle": "dev-master",
         "friendsofsymfony/rest-bundle": "dev-master",
