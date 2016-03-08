@@ -73,7 +73,7 @@ trait RehatControllerTrait
      *
      * @return Response
      */
-    protected function new(FormInterface $form)
+    protected function create(FormInterface $form)
     {
         return $this->handleView(new View($this->flattenForm($form)));
     }
