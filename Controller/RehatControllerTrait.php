@@ -121,6 +121,16 @@ trait RehatControllerTrait
             $view->setData($this->flattenForm($form));
         }
 
+        $event = new FilterFormEvent();
+        $event->setData($entity);
+        $event->setForm($form);
+        $this->fireEvent(Constants::PRE_FORM_VIEW, $event);
+
+        $response = $event->getResponse();
+        if ($response) {
+            return $response;
+        }
+
         return $this->handleView($view);
     }
 
