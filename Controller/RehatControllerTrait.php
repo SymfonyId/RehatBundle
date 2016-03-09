@@ -119,16 +119,16 @@ trait RehatControllerTrait
         } else {
             $form->setData($entity);
             $view->setData($this->flattenForm($form));
-        }
 
-        $event = new FilterFormEvent();
-        $event->setData($entity);
-        $event->setForm($form);
-        $this->fireEvent(Constants::PRE_FORM_VIEW, $event);
+            $event = new FilterFormEvent();
+            $event->setData($entity);
+            $event->setForm($form);
+            $this->fireEvent(Constants::PRE_FORM_VIEW, $event);
 
-        $response = $event->getResponse();
-        if ($response) {
-            return $response;
+            $response = $event->getResponse();
+            if ($response) {
+                return $response;
+            }
         }
 
         return $this->handleView($view);
@@ -390,8 +390,14 @@ trait RehatControllerTrait
 
             return $result;
         }
+        $view = $form->createView();
 
-        return $form->getData();
+        return array(
+            'name' => $view->vars['full_name'],
+            'type' => $view->vars['block_prefixes'][1],
+            'required' => array_key_exists('required', $view->vars)? $view->vars['required']: false,
+            'data' => $form->getData(),
+        );
     }
 
     /**
