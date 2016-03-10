@@ -417,8 +417,8 @@ trait RehatControllerTrait
             'limit' => $request->query->get('limit', $this->getParameter('sir.limit')),
         );
 
-        if ($filter = $request->query->get('filter')) {
-            $params['filter'] = $filter;
+        if ($filter = $request->query->get('q')) {
+            $params['q'] = $filter;
         }
 
         if ($sortBy = $request->query->get('sort_by')) {
