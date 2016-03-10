@@ -44,7 +44,7 @@ class FilterQueryListener extends AbstractQueryListener
             return;
         }
 
-        $this->filter = $request->query->get('filter');
+        $this->filter = $request->query->get('q');
     }
 
     /**
