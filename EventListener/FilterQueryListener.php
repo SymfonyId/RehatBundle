@@ -6,7 +6,7 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
-use Symfonian\Indonesia\RehatBundle\Annotation\Filter;
+use Symfonian\Indonesia\RehatBundle\Annotation\Searchable;
 use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -71,7 +71,7 @@ class FilterQueryListener extends AbstractQueryListener
         $filters = array();
         foreach ($reflection->getProperties() as $reflectionProperty) {
             foreach ($this->reader->getPropertyAnnotations($reflectionProperty) as $annotation) {
-                if ($annotation instanceof Filter) {
+                if ($annotation instanceof Searchable) {
                     $filters[] = $reflectionProperty->getName();
                 }
             }

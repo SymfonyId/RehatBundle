@@ -17,6 +17,6 @@ namespace Symfonian\Indonesia\RehatBundle\Annotation;
  *
  * @author Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  */
-class Filter
+class Searchable
 {
 }
