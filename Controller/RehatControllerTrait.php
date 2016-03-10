@@ -171,23 +171,22 @@ trait RehatControllerTrait
 
     /**
      * @param Request         $request
-     * @param EntityInterface $entity
+     * @param \ReflectionClass $reflection
      *
      * @return Response
      */
-    protected function getCollection(Request $request, EntityInterface $entity)
+    protected function getCollection(Request $request, \ReflectionClass $reflection)
     {
         $requestParams = $this->getRequestParam($request);
-        $reflection = new \ReflectionClass($entity);
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->getManager()->createQueryBuilder();
         $queryBuilder->select(Constants::ENTITY_ALIAS);
-        $queryBuilder->from($entity, Constants::ENTITY_ALIAS);
+        $queryBuilder->from($reflection->getName(), Constants::ENTITY_ALIAS);
 
         $filterList = new FilterQueryEvent();
         $filterList->setQueryBuilder($queryBuilder);
         $filterList->setAlias(Constants::ENTITY_ALIAS);
-        $filterList->setEntityClass($entity);
+        $filterList->setEntityClass($reflection->getName());
         $this->fireEvent(Constants::FILTER_LIST, $filterList);
 
         $query = $queryBuilder->getQuery();
