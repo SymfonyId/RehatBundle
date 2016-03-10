@@ -95,6 +95,8 @@ trait RehatControllerTrait
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
+
+            return $this->handleView($view);
         }
 
         return $this->handle($request, $form, $entity, $view);
@@ -116,19 +118,21 @@ trait RehatControllerTrait
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
-        } else {
-            $form->setData($entity);
-            $view->setData($this->flattenForm($form));
 
-            $event = new FilterFormEvent();
-            $event->setData($entity);
-            $event->setForm($form);
-            $this->fireEvent(Constants::PRE_FORM_VIEW, $event);
+            return $this->handleView($view);
+        }
 
-            $response = $event->getResponse();
-            if ($response) {
-                return $response;
-            }
+        $form->setData($entity);
+        $view->setData($this->flattenForm($form));
+
+        $event = new FilterFormEvent();
+        $event->setData($entity);
+        $event->setForm($form);
+        $this->fireEvent(Constants::PRE_FORM_VIEW, $event);
+
+        $response = $event->getResponse();
+        if ($response) {
+            return $response;
         }
 
         return $this->handleView($view);
@@ -148,6 +152,8 @@ trait RehatControllerTrait
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
+
+            return $this->handleView($view);
         }
 
         $event = new FilterEntityEvent();
@@ -170,7 +176,7 @@ trait RehatControllerTrait
     }
 
     /**
-     * @param Request         $request
+     * @param Request          $request
      * @param \ReflectionClass $reflection
      *
      * @return Response
