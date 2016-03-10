@@ -57,7 +57,13 @@ class FilterQueryListener extends AbstractQueryListener
             return;
         }
 
-        $this->filters = $request->query->all();
+        $this->filters = array_filter($request->query->all(), function ($value, $key) {
+            return !('q' === $key || 'sort_by' === $key || 'page' === $key || 'limit' === $key);
+        });
+
+        if (empty($this->filters)) {
+            return;
+        }
     }
 
     /**

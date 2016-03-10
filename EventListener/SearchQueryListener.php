@@ -57,6 +57,10 @@ class SearchQueryListener extends AbstractQueryListener
         }
 
         $this->filter = $request->query->get('q');
+
+        if (empty($this->filter)) {
+            return;
+        }
     }
 
     /**
