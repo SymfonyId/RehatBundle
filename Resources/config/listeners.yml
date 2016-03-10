@@ -1,6 +1,6 @@
 services:
     symfonian_id.rehat.filter_query:
-        class: Symfonian\Indonesia\RehatBundle\EventListener\FilterQueryListener
+        class: Symfonian\Indonesia\RehatBundle\EventListener\SearchQueryListener
         calls:
             - [setContainer, ['@service_container']]
         arguments:

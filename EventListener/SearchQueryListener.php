@@ -15,7 +15,6 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
-use Symfonian\Indonesia\RehatBundle\Annotation\Filterable;
 use Symfonian\Indonesia\RehatBundle\Annotation\Searchable;
 use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
@@ -24,14 +23,14 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 /**
  * @author Muhammad Surya Ihsanuddin <surya.kejawen@gmail.com>
  */
-class FilterQueryListener extends AbstractQueryListener
+class SearchQueryListener extends AbstractQueryListener
 {
     /**
      * @var Reader
      */
     private $reader;
 
-    private $filters = array();
+    private $filter;
 
     /**
      * @param EntityManager $entityManager
@@ -57,7 +56,7 @@ class FilterQueryListener extends AbstractQueryListener
             return;
         }
 
-        $this->filters = $request->query->all();
+        $this->filter = $request->query->get('q');
     }
 
     /**
@@ -66,12 +65,12 @@ class FilterQueryListener extends AbstractQueryListener
     public function onFilterQuery(FilterQueryEvent $event)
     {
         $entity = $event->getEntityClass();
-        $filters = $this->getFilters(new \ReflectionClass($entity));
+        $filters = $this->getSearchable(new \ReflectionClass($entity));
         if (!$filters) {
             return;
         }
 
-        $this->applyFilter($this->getClassMetadata($entity), $event->getQueryBuilder(), $filters, $this->filters);
+        $this->applyFilter($this->getClassMetadata($entity), $event->getQueryBuilder(), $filters, $this->filter);
     }
 
     /**
@@ -79,12 +78,12 @@ class FilterQueryListener extends AbstractQueryListener
      *
      * @return array
      */
-    private function getFilters(\ReflectionClass $reflection)
+    private function getSearchable(\ReflectionClass $reflection)
     {
         $filters = array();
         foreach ($reflection->getProperties() as $reflectionProperty) {
             foreach ($this->reader->getPropertyAnnotations($reflectionProperty) as $annotation) {
-                if ($annotation instanceof Filterable) {
+                if ($annotation instanceof Searchable) {
                     $filters[] = $reflectionProperty->getName();
                 }
             }
@@ -97,20 +96,16 @@ class FilterQueryListener extends AbstractQueryListener
      * @param ClassMetadata $metadata
      * @param QueryBuilder  $queryBuilder
      * @param array         $filterFields
-     * @param array         $filters
+     * @param $filter
      */
-    private function applyFilter(ClassMetadata $metadata, QueryBuilder $queryBuilder, array $filterFields, $filters)
+    private function applyFilter(ClassMetadata $metadata, QueryBuilder $queryBuilder, array $filterFields, $filter)
     {
         foreach ($this->getMapping($metadata, $filterFields) as $key => $value) {
             if (array_key_exists('join', $value)) {
-                if (in_array($value['join_field'], array_keys($filters))) {
-                    $queryBuilder->leftJoin(sprintf('%s.%s', Constants::ENTITY_ALIAS, $value['join_field']), $value['join_alias'], 'WITH');
-                    $this->buildFilter($queryBuilder, $value, $value['join_alias'], $filters[$value['join_field']]);
-                }
+                $queryBuilder->leftJoin(sprintf('%s.%s', Constants::ENTITY_ALIAS, $value['join_field']), $value['join_alias'], 'WITH');
+                $this->buildFilter($queryBuilder, $value, $value['join_alias'], $filter);
             } else {
-                if (in_array($value, array_keys($filters))) {
-                    $this->buildFilter($queryBuilder, $value, Constants::ENTITY_ALIAS, $filters[$value]);
-                }
+                $this->buildFilter($queryBuilder, $value, Constants::ENTITY_ALIAS, $filter);
             }
         }
     }
@@ -130,7 +125,7 @@ class FilterQueryListener extends AbstractQueryListener
                 $queryBuilder->setParameter($metadata['fieldName'], $date->format('Y-m-d'));
             }
         } else {
-            $queryBuilder->orWhere(sprintf('%s.%s = :%s', $alias, $metadata['fieldName'], $metadata['fieldName']));
+            $queryBuilder->orWhere(sprintf('%s.%s LIKE :%s', $alias, $metadata['fieldName'], $metadata['fieldName']));
             $queryBuilder->setParameter($metadata['fieldName'], strtr('%filter%', array('filter' => $filter)));
         }
     }
@@ -153,7 +148,7 @@ class FilterQueryListener extends AbstractQueryListener
             } catch (\Exception $ex) {
                 $mapping = $metadata->getAssociationMapping($fieldName);
                 $associationMatadata = $this->getClassMetadata($mapping['targetEntity']);
-                if ($filter = $this->getFilters(new \ReflectionClass($mapping['targetEntity']))) {
+                if ($filter = $this->getSearchable(new \ReflectionClass($mapping['targetEntity']))) {
                     $filters[] = array_merge(array(
                         'join' => true,
                         'join_field' => $fieldName,
