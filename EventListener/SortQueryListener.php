@@ -56,10 +56,6 @@ class SortQueryListener extends AbstractQueryListener
         }
 
         $this->sort = $request->query->get('sort_by');
-
-        if (empty($this->sort)) {
-            return;
-        }
     }
 
     /**
@@ -67,6 +63,10 @@ class SortQueryListener extends AbstractQueryListener
      */
     public function onFilterQuery(FilterQueryEvent $event)
     {
+        if (empty($this->sort)) {
+            return;
+        }
+
         if (!$this->getController()) {
             return;
         }

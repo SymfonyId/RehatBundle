@@ -57,10 +57,6 @@ class SearchQueryListener extends AbstractQueryListener
         }
 
         $this->filter = $request->query->get('q');
-
-        if (empty($this->filter)) {
-            return;
-        }
     }
 
     /**
@@ -68,6 +64,10 @@ class SearchQueryListener extends AbstractQueryListener
      */
     public function onFilterQuery(FilterQueryEvent $event)
     {
+        if (empty($this->filter)) {
+            return;
+        }
+
         $entity = $event->getEntityClass();
         $filters = $this->getSearchable(new \ReflectionClass($entity));
         if (!$filters) {

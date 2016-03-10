@@ -60,10 +60,6 @@ class FilterQueryListener extends AbstractQueryListener
         $this->filters = array_filter($request->query->all(), function ($value, $key) {
             return !('q' === $key || 'sort_by' === $key || 'page' === $key || 'limit' === $key);
         });
-
-        if (empty($this->filters)) {
-            return;
-        }
     }
 
     /**
@@ -71,6 +67,10 @@ class FilterQueryListener extends AbstractQueryListener
      */
     public function onFilterQuery(FilterQueryEvent $event)
     {
+        if (empty($this->filters)) {
+            return;
+        }
+
         $entity = $event->getEntityClass();
         $filters = $this->getFilters(new \ReflectionClass($entity));
         if (!$filters) {
