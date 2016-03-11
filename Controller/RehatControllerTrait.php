@@ -306,6 +306,12 @@ trait RehatControllerTrait
             } else {
                 $view->setStatusCode(Response::HTTP_CREATED);
             }
+
+            $preSave = new FilterFormEvent();
+            $preSave->setData($data);
+            $preSave->setForm($form);
+            $this->fireEvent(Constants::PRE_FORM_SUBMIT, $preSave);
+
             $this->save($formData);
         } else {
             $view->setData($this->getErrorFormat($form->getErrors(), Response::HTTP_NOT_ACCEPTABLE));
