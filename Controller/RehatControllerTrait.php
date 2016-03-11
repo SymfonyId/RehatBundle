@@ -28,6 +28,7 @@ use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
 /**
@@ -55,6 +56,14 @@ trait RehatControllerTrait
      * @return Response
      */
     abstract protected function handleView(View $view);
+
+    /**
+     * @param $route
+     * @param array $parameters
+     * @param int $referenceType
+     * @return string
+     */
+    abstract protected function generateUrl($route, $parameters = array(), $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH);
 
     /**
      * @param Request         $request
@@ -397,12 +406,22 @@ trait RehatControllerTrait
         }
         $view = $form->createView();
 
-        return array(
+        $flatten = array(
             'name' => $view->vars['full_name'],
             'type' => $view->vars['block_prefixes'][1],
             'required' => array_key_exists('required', $view->vars)? $view->vars['required']: false,
             'data' => $form->getData(),
         );
+
+        if (array_key_exists('storage', $view->vars['attr']) && array_key_exists('route', $view->vars['attr']['storage'])) {
+            if (array_key_exists('parameters', $view->vars['attr']['storage'])) {
+                $flatten['storage'] = $this->generateUrl($view->vars['attr']['storage']['route'], $view->vars['attr']['storage']['parameters']);
+            } else {
+                $flatten['storage'] = $this->generateUrl($view->vars['attr']['storage']['route']);
+            }
+        }
+
+        return $flatten;
     }
 
     /**
