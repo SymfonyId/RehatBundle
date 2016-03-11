@@ -421,9 +421,9 @@ trait RehatControllerTrait
 
         if (array_key_exists('storage', $view->vars['attr']) && array_key_exists('route', $view->vars['attr']['storage'])) {
             if (array_key_exists('parameters', $view->vars['attr']['storage'])) {
-                $flatten['data']['storage'] = $this->generateUrl($view->vars['attr']['storage']['route'], $view->vars['attr']['storage']['parameters']);
+                $flatten['storage'] = $this->generateUrl($view->vars['attr']['storage']['route'], $view->vars['attr']['storage']['parameters']);
             } else {
-                $flatten['data']['storage'] = $this->generateUrl($view->vars['attr']['storage']['route']);
+                $flatten['storage'] = $this->generateUrl($view->vars['attr']['storage']['route']);
             }
         }
 
