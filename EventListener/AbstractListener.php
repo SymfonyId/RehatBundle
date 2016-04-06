@@ -7,8 +7,14 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 class AbstractListener
 {
+    /**
+     * @var RehatControllerTrait
+     */
     private $controller;
 
+    /**
+     * @var \ReflectionObject
+     */
     private $reflectionController;
 
     /**
@@ -30,7 +36,7 @@ class AbstractListener
 
         $allow = false;
         foreach ($this->reflectionController->getTraits() as $trait) {
-            if ($trait->getName() === RehatControllerTrait::class) {
+            if ($trait->getName() === RehatControllerTrait::class) {//Only RehatControllerTrait can use this listener
                 $allow = true;
                 break;
             }
