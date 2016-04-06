@@ -297,6 +297,7 @@ trait RehatControllerTrait
             return $response;
         }
 
+        $form->setData($data);
         $form->handleRequest($request);
         if ($form->isValid()) {
             $formData = $form->getData();
