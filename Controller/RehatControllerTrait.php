@@ -213,7 +213,7 @@ trait RehatControllerTrait
         $pager->setCurrentPage($requestParams['page']);
         $pager->setMaxPerPage($requestParams['limit']);
 
-        $embed = strtolower($reflection->getShortName()).'s';
+        $embed = strtolower($reflection->getShortName().$this->getParameter('sir.prural'));
         $pagerFactory = new PagerfantaFactory();
         $representation = $pagerFactory->createRepresentation(
             $pager,

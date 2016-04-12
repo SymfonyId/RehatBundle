@@ -29,12 +29,9 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('date_format')
-                    ->defaultValue('d-m-Y')
-                ->end()
-                ->scalarNode('limit')
-                    ->defaultValue(17)
-                ->end()
+                ->scalarNode('date_format')->defaultValue('d-m-Y')->end()
+                ->scalarNode('limit')->defaultValue(17)->end()
+                ->scalarNode('prural')->defaultValue('s')->end()
             ->end()
         ;
 
