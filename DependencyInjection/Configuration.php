@@ -33,7 +33,7 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('d-m-Y')
                 ->end()
                 ->scalarNode('limit')
-                    ->defaultValue(10)
+                    ->defaultValue(17)
                 ->end()
             ->end()
         ;
