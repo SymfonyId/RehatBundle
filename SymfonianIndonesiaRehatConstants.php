@@ -21,7 +21,5 @@ class SymfonianIndonesiaRehatConstants
     const SESSION_SORTED_NAME = 'sir.sort';
 
     const FILTER_LIST = 'sir.filter_query';
-    const PRE_FORM_VIEW = 'sir.pre_form_view';
-    const PRE_FORM_SUBMIT = 'sir.pre_form_submit';
     const PRE_DELETE = 'sir.pre_delete';
 }

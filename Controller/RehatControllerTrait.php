@@ -20,7 +20,6 @@ use Hateoas\Representation\Factory\PagerfantaFactory;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
 use Symfonian\Indonesia\RehatBundle\Event\FilterEntityEvent;
-use Symfonian\Indonesia\RehatBundle\Event\FilterFormEvent;
 use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
 use Symfonian\Indonesia\RehatBundle\Model\EntityInterface;
 use Symfonian\Indonesia\RehatBundle\SymfonianIndonesiaRehatConstants as Constants;
@@ -133,16 +132,6 @@ trait RehatControllerTrait
 
         $form->setData($entity);
         $view->setData($this->flattenForm($form));
-
-        $event = new FilterFormEvent();
-        $event->setData($entity);
-        $event->setForm($form);
-        $this->fireEvent(Constants::PRE_FORM_VIEW, $event);
-
-        $response = $event->getResponse();
-        if ($response) {
-            return $response;
-        }
 
         return $this->handleView($view);
     }
@@ -287,16 +276,6 @@ trait RehatControllerTrait
      */
     private function handle(Request $request, FormInterface $form, EntityInterface $data, View $view)
     {
-        $event = new FilterFormEvent();
-        $event->setData($data);
-        $event->setForm($form);
-        $this->fireEvent(Constants::PRE_FORM_SUBMIT, $event);
-
-        $response = $event->getResponse();
-        if ($response) {
-            return $response;
-        }
-
         $form->setData($data);
         $form->handleRequest($request);
         if ($form->isValid()) {
@@ -307,11 +286,6 @@ trait RehatControllerTrait
             } else {
                 $view->setStatusCode(Response::HTTP_CREATED);
             }
-
-            $preSave = new FilterFormEvent();
-            $preSave->setData($data);
-            $preSave->setForm($form);
-            $this->fireEvent(Constants::PRE_FORM_SUBMIT, $preSave);
 
             $this->save($formData);
         } else {
