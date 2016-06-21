@@ -197,7 +197,7 @@ trait RehatControllerTrait
         $query->useQueryCache(true);
         $query->useResultCache(true, 1, serialize($query->getParameters()));
 
-        $pagerAdapter = new DoctrineORMAdapter($queryBuilder);
+        $pagerAdapter = new DoctrineORMAdapter($query);
         $pager = new Pagerfanta($pagerAdapter);
         $pager->setCurrentPage($requestParams['page']);
         $pager->setMaxPerPage($requestParams['limit']);
