@@ -236,7 +236,7 @@ trait RehatControllerTrait
 
         $view = new View();
         $this->checkDepth($view);
-        
+
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -446,8 +446,9 @@ trait RehatControllerTrait
     private function checkDepth(View $view)
     {
         if ($this->getParameter('sir.max_depth_check')) {
-            $context = $view->getContext();
-            $context->setMaxDepth(0);
+            $context = $view->getSerializationContext();
+            $context->enableMaxDepthChecks();
+            $view->setSerializationContext($context);
         }
     }
 }
