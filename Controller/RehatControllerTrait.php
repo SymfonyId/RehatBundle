@@ -68,29 +68,21 @@ trait RehatControllerTrait
      * @param Request         $request
      * @param FormInterface   $form
      * @param EntityInterface $entity
-     * @param View            $view
      *
      * @return Response
      */
-    protected function post(Request $request, FormInterface $form, EntityInterface $entity, View $view = null)
+    protected function post(Request $request, FormInterface $form, EntityInterface $entity)
     {
-        if ($view === null) {
-            $view = new View();
-        }
-        return $this->handle($request, $form, $entity, $view);
+        return $this->handle($request, $form, $entity, new View());
     }
 
     /**
      * @param FormInterface $form
-     * @param View          $view
      *
      * @return Response
      */
-    protected function create(FormInterface $form, View $view = null)
+    protected function create(FormInterface $form)
     {
-        if ($view === null) {
-            $view = new View();
-        }
         return $this->handleView(new View($this->flattenForm($form)));
     }
 
@@ -99,18 +91,15 @@ trait RehatControllerTrait
      * @param FormInterface $form
      * @param int           $id
      * @param string        $entityClass
-     * @param View          $view
      *
      * @return Response
      */
-    protected function put(Request $request, FormInterface $form, $id, $entityClass, View $view = null)
+    protected function put(Request $request, FormInterface $form, $id, $entityClass)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
 
-        if ($view === null) {
-            $view = new View();
-        }
+        $view = new View();
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -125,18 +114,15 @@ trait RehatControllerTrait
      * @param FormInterface $form
      * @param int           $id
      * @param string        $entityClass
-     * @param View          $view
      *
      * @return Response
      */
-    protected function edit(FormInterface $form, $id, $entityClass, View $view = null)
+    protected function edit(FormInterface $form, $id, $entityClass)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
 
-        if ($view === null) {
-            $view = new View();
-        }
+        $view = new View();
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -153,17 +139,14 @@ trait RehatControllerTrait
     /**
      * @param int    $id
      * @param string $entityClass
-     * @param View   $view
      *
      * @return Response
      */
-    protected function delete($id, $entityClass, View $view = null)
+    protected function delete($id, $entityClass)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
-        if ($view === null) {
-            $view = new View();
-        }
+        $view = new View();
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -193,11 +176,10 @@ trait RehatControllerTrait
     /**
      * @param Request          $request
      * @param \ReflectionClass $reflection
-     * @param View             $view
      *
      * @return Response
      */
-    protected function getCollection(Request $request, \ReflectionClass $reflection, View $view = null)
+    protected function getCollection(Request $request, \ReflectionClass $reflection)
     {
         $requestParams = $this->getRequestParam($request);
         /** @var QueryBuilder $queryBuilder */
@@ -211,7 +193,7 @@ trait RehatControllerTrait
         $filterList->setEntityClass($reflection->getName());
         $this->fireEvent(Constants::FILTER_LIST, $filterList);
 
-        $query = $queryBuilder->getQuery();
+        $query = $filterList->getQueryBuilder()->getQuery();
         $query->useQueryCache(true);
         $query->useResultCache(true, 1, serialize($query->getParameters()));
 
@@ -228,28 +210,21 @@ trait RehatControllerTrait
             new CollectionRepresentation($pager->getCurrentPageResults(), $embed, $embed)
         );
 
-        if ($view === null) {
-            $view = new View();
-        }
-        $view->setData($representation);
-        return $this->handleView($view);
+        return $this->handleView(new View($representation));
     }
 
     /**
      * @param int    $id
      * @param string $entityClass
-     * @param View   $view
      *
      * @return Response
      */
-    protected function getSingle($id, $entityClass, View $view = null)
+    protected function getSingle($id, $entityClass)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
 
-        if ($view === null) {
-            $view = new View();
-        }
+        $view = new View();
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
