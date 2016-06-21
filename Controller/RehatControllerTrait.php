@@ -68,21 +68,29 @@ trait RehatControllerTrait
      * @param Request         $request
      * @param FormInterface   $form
      * @param EntityInterface $entity
+     * @param View            $view
      *
      * @return Response
      */
-    protected function post(Request $request, FormInterface $form, EntityInterface $entity)
+    protected function post(Request $request, FormInterface $form, EntityInterface $entity, View $view = null)
     {
-        return $this->handle($request, $form, $entity, new View());
+        if ($view === null) {
+            $view = new View();
+        }
+        return $this->handle($request, $form, $entity, $view);
     }
 
     /**
      * @param FormInterface $form
+     * @param View          $view
      *
      * @return Response
      */
-    protected function create(FormInterface $form)
+    protected function create(FormInterface $form, View $view = null)
     {
+        if ($view === null) {
+            $view = new View();
+        }
         return $this->handleView(new View($this->flattenForm($form)));
     }
 
@@ -91,15 +99,18 @@ trait RehatControllerTrait
      * @param FormInterface $form
      * @param int           $id
      * @param string        $entityClass
+     * @param View          $view
      *
      * @return Response
      */
-    protected function put(Request $request, FormInterface $form, $id, $entityClass)
+    protected function put(Request $request, FormInterface $form, $id, $entityClass, View $view = null)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
 
-        $view = new View();
+        if ($view === null) {
+            $view = new View();
+        }
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -114,15 +125,18 @@ trait RehatControllerTrait
      * @param FormInterface $form
      * @param int           $id
      * @param string        $entityClass
+     * @param View          $view
      *
      * @return Response
      */
-    protected function edit(FormInterface $form, $id, $entityClass)
+    protected function edit(FormInterface $form, $id, $entityClass, View $view = null)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
 
-        $view = new View();
+        if ($view === null) {
+            $view = new View();
+        }
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -139,14 +153,17 @@ trait RehatControllerTrait
     /**
      * @param int    $id
      * @param string $entityClass
+     * @param View   $view
      *
      * @return Response
      */
-    protected function delete($id, $entityClass)
+    protected function delete($id, $entityClass, View $view = null)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
-        $view = new View();
+        if ($view === null) {
+            $view = new View();
+        }
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -176,10 +193,11 @@ trait RehatControllerTrait
     /**
      * @param Request          $request
      * @param \ReflectionClass $reflection
+     * @param View             $view
      *
      * @return Response
      */
-    protected function getCollection(Request $request, \ReflectionClass $reflection)
+    protected function getCollection(Request $request, \ReflectionClass $reflection, View $view = null)
     {
         $requestParams = $this->getRequestParam($request);
         /** @var QueryBuilder $queryBuilder */
@@ -210,21 +228,28 @@ trait RehatControllerTrait
             new CollectionRepresentation($pager->getCurrentPageResults(), $embed, $embed)
         );
 
-        return $this->handleView(new View($representation));
+        if ($view === null) {
+            $view = new View();
+        }
+        $view->setData($representation);
+        return $this->handleView($view);
     }
 
     /**
      * @param int    $id
      * @param string $entityClass
+     * @param View   $view
      *
      * @return Response
      */
-    protected function getSingle($id, $entityClass)
+    protected function getSingle($id, $entityClass, View $view = null)
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
 
-        $view = new View();
+        if ($view === null) {
+            $view = new View();
+        }
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
