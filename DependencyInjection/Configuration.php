@@ -29,6 +29,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->booleanNode('max_depth_check')->defaultValue(true)->end()
                 ->scalarNode('date_format')->defaultValue('d-m-Y')->end()
                 ->scalarNode('limit')->defaultValue(17)->end()
                 ->scalarNode('prural')->defaultValue('s')->end()

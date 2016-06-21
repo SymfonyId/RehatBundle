@@ -100,6 +100,8 @@ trait RehatControllerTrait
         $entity = $this->find($entityClass, $id);
 
         $view = new View();
+        $this->checkDepth($view);
+
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -123,6 +125,8 @@ trait RehatControllerTrait
         $entity = $this->find($entityClass, $id);
 
         $view = new View();
+        $this->checkDepth($view);
+
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -146,7 +150,10 @@ trait RehatControllerTrait
     {
         /** @var EntityInterface $entity */
         $entity = $this->find($entityClass, $id);
+
         $view = new View();
+        $this->checkDepth($view);
+
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -210,7 +217,10 @@ trait RehatControllerTrait
             new CollectionRepresentation($pager->getCurrentPageResults(), $embed, $embed)
         );
 
-        return $this->handleView(new View($representation));
+        $view = new View($representation);
+        $this->checkDepth($view);
+
+        return $this->handleView($view);
     }
 
     /**
@@ -225,6 +235,8 @@ trait RehatControllerTrait
         $entity = $this->find($entityClass, $id);
 
         $view = new View();
+        $this->checkDepth($view);
+        
         if (!$entity) {
             $view->setData($this->getErrorFormat($this->translate('not_found'), Response::HTTP_NOT_FOUND));
             $view->setStatusCode(Response::HTTP_NOT_FOUND);
@@ -426,5 +438,16 @@ trait RehatControllerTrait
         }
 
         return $params;
+    }
+
+    /**
+     * @param View $view
+     */
+    private function checkDepth(View $view)
+    {
+        if ($this->getParameter('sir.max_depth_check')) {
+            $context = $view->getContext();
+            $context->setMaxDepth(0);
+        }
     }
 }

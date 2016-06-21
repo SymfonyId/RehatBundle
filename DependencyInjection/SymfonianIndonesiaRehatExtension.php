@@ -30,6 +30,7 @@ class SymfonianIndonesiaRehatExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter('sir.max_depth_check', $config['max_depth_check']);
         $container->setParameter('sir.data_format', $config['date_format']);
         $container->setParameter('sir.limit', $config['limit']);
         $container->setParameter('sir.prural', $config['prural']);
