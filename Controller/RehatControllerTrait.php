@@ -288,6 +288,7 @@ trait RehatControllerTrait
      */
     private function handle(Request $request, FormInterface $form, EntityInterface $data, View $view)
     {
+        $this->checkDepth($view);
         $form->setData($data);
         $form->handleRequest($request);
         if ($form->isValid()) {
