@@ -17,8 +17,10 @@ use FOS\RestBundle\View\View;
 use Hateoas\Configuration\Route;
 use Hateoas\Representation\CollectionRepresentation;
 use Hateoas\Representation\Factory\PagerfantaFactory;
+use JMS\Serializer\SerializationContext;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
+use Symfonian\Indonesia\RehatBundle\Annotation\Show;
 use Symfonian\Indonesia\RehatBundle\Event\FilterEntityEvent;
 use Symfonian\Indonesia\RehatBundle\Event\FilterQueryEvent;
 use Symfonian\Indonesia\RehatBundle\Model\EntityInterface;
@@ -218,6 +220,10 @@ trait RehatControllerTrait
         );
 
         $view = new View($representation);
+        $fields = $request->attributes->get('fields');
+        if ($fields instanceof Show) {
+            $view->setSerializationContext(SerializationContext::create()->setGroups($fields->getGroups()));
+        }
         $this->checkDepth($view);
 
         return $this->handleView($view);

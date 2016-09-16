@@ -22,3 +22,11 @@ services:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
             - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
             - { name: kernel.event_listener, event: sir.filter_query, method: onFilterQuery }
+
+
+    symfonian_id.rehat.show:
+        class: Symfonian\Indonesia\RehatBundle\EventListener\ShowListener
+        arguments:
+            - '@annotation_reader'
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, method: onKernelController }
